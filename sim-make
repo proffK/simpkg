@@ -1,0 +1,40 @@
+#!/bin/sh 
+# This is simple package builder for my LFS system
+
+if [ $# -le 1 ]
+then
+		echo "Too few argument"
+		exit 1
+fi	
+if [ ! -r ./simpkg-desc ]
+then
+		echo "No description"
+		exit 2
+fi
+if [ ! -r ./simpkg-doins ]
+then 
+		echo "No install script"
+		exit 3
+fi
+if [ ! -r ./simpkg-dounins ]
+then
+		echo "No uninstall script"
+		exit 4
+fi
+if [ ! -r ./simpkg-deps ]
+then
+		echo "No depends"
+		exit 5
+fi
+
+find . -name '*' -print | sed -e 's/^.//g' | sed -e '/simpkg*/d' > simpkg-files
+du -hs | sed -e 's/[.,\ ]//g' > simpkg-size
+echo $(basename $1) > simpkg-name
+echo $2 > simpkg-ver
+
+tar -rvvf $1.tar *
+gzip -c $1.tar > $1.tgz
+rm $1.tar
+
+echo "Package $1.tgz created succesfully"
+exit 0

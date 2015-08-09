@@ -1,0 +1,32 @@
+#!/bin/sh
+# Simple removing script
+
+METADIR=/var/simpkg/
+
+if [ $# -eq 0 ] 
+then
+		echo "Empty argument"
+		exit 1
+fi
+
+TARGET_METADIR=$(find $METADIR -name $1 -print)
+if [ -z $TARGET_METADIR ]
+then
+		echo "Package doesn't exit"
+		exit 2
+fi
+
+cd $TARGET_METADIR
+
+for FILE in $(cat ./simpkg-files)
+do
+		rm -v $FILE
+done
+
+bash simpkg-doun*
+
+cd /
+
+rm -rf $TARGET_METADIR
+
+

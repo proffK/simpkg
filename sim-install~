@@ -1,0 +1,59 @@
+#!/bin/sh 
+# This is simple package manager for my LFS system
+
+METADIR=/var/simpkg/
+PKGSTORAGE=/home/pkgstorage/
+if [ $# -eq 0 ]
+then
+		echo "Empty argument"
+		exit 1
+fi	
+if [ ! -r $1 ]
+then
+		echo "File doesn't exist"
+		exit 2
+fi
+		FILENAME=$(basename $1)
+		cp -pv $1 $PKGSTORAGE$FILENAME
+		md5sum $PKGSTORAGE$FILENAME > $PKGSTORAGE$FILENAME.md5
+		
+		cp -v $1 /$FILENAME
+		
+		cd /
+		
+		tar -pxf $FILENAME
+		PKGNAME=$(cat simpkg-name)
+		echo $PKGNAME
+		bash simpkg-doins
+		mkdir -vp $METADIR$PKGNAME
+
+		for i in $( ls | grep simpkg )
+		do
+				mv -v $i $METADIR$PKGNAME/$i
+		done
+
+		for i in $( cat simpkg-deps )
+		do
+            res=$( find $METADIR -name "$i" -print)
+            if [ -z res ] 
+            then
+                echo "WARNING: no found depends package $i"
+            fi
+		done
+
+		rm /$FILENAME
+
+		echo "Package installed succesfully"
+		echo "Package name:"
+		cd $METADIR$PKGNAME
+		cat simpkg-name
+		echo "Version:"
+		cat simpkg-ver
+        echo "Depends:"
+        cat simpkg-deps
+		echo "Uncompressed size:"
+		cat simpkg-size
+		echo "Description:"
+		cat simpkg-desc
+		
+		exit 0
